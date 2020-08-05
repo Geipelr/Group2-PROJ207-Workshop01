@@ -71,7 +71,6 @@ namespace Invigulus_ExamMaintenance
             var result = updateForm.ShowDialog();
             if (result == DialogResult.OK)
                 RefreshExams(updateForm.Exam.ExamID);
-            else SetCbExams();
         }
 
         /* DELETE a new Exam (must not contain Registered Examinees */

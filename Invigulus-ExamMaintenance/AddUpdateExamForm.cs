@@ -119,7 +119,10 @@ namespace Invigulus_ExamMaintenance
             else
                 exam.Duration = Convert.ToInt32(ctrl_tb_duration.Text);
             exam.ExamURL = ctrl_tb_url.Text;
-            exam.PermittedAttempts = Convert.ToInt32(ctrl_tb_permattempt.Text);
+            if (ctrl_tb_permattempt.Text == "")
+                exam.PermittedAttempts = null;
+            else
+                exam.PermittedAttempts = Convert.ToInt32(ctrl_tb_permattempt.Text);
         }
 
         private void ctrl_btn_cancel_Click(object sender, EventArgs e)
@@ -133,7 +136,7 @@ namespace Invigulus_ExamMaintenance
                 (
                     Validator.IsPresent(ctrl_tb_examname, "Exam Name") &&
                     Validator.IsNullOrNonNegInt(ctrl_tb_duration, "Duration") &&
-                    Validator.IsNonNegativeInt(ctrl_tb_permattempt, "Permitted Attempts") &&
+                    Validator.IsNullOrNonNegInt(ctrl_tb_permattempt, "Permitted Attempts") &&
                     Validator.IsPresent(ctrl_tb_url, "Exam URL")
                 );
         }

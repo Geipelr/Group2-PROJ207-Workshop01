@@ -33,9 +33,9 @@ namespace InvigulusData
                                 ExamID = Convert.ToInt32(dr["ExamID"]),
                                 Administrator = Convert.ToInt32(dr["Administrator"]),
                                 ExamName = dr["ExamName"].ToString(),
-                                Duration = Convert.ToInt32(dr["Duration"]),
+                                Duration = Convert.ToInt32(dr["Duration"] ?? null),
                                 ExamURL = dr["ExamURL"].ToString(),
-                                PermittedAttempts = Convert.ToInt32(dr["PermittedAttempts"])
+                                PermittedAttempts = Convert.ToInt32(dr["PermittedAttempts"] ?? null)
                             };
 
                         }
@@ -78,7 +78,11 @@ namespace InvigulusData
                             else
                                 exam.Duration = Convert.ToInt32(dr["Duration"]);
                             exam.ExamURL = dr["ExamURL"].ToString();
-                            exam.PermittedAttempts = Convert.ToInt32(dr["PermittedAttempts"]);
+                            if (dr["PermittedAttempts"] == DBNull.Value)
+                                exam.PermittedAttempts = null;
+                            else
+                                exam.PermittedAttempts = Convert.ToInt32(dr["PermittedAttempts"]);
+
                             exams.Add(exam);
                         }
 
@@ -111,7 +115,12 @@ namespace InvigulusData
 
 
                     cmd.Parameters.AddWithValue("@ExamUrl", exam.ExamURL);
-                    cmd.Parameters.AddWithValue("@PermittedAttempts", exam.PermittedAttempts);
+
+                    //Check if duration has a value
+                    if (exam.PermittedAttempts.HasValue)
+                        cmd.Parameters.AddWithValue("@PermittedAttempts", exam.Duration);
+                    else
+                        cmd.Parameters.AddWithValue("@PermittedAttempts", DBNull.Value);
                     connection.Open();
                     examID = (int)cmd.ExecuteScalar();
                                 //--reference--//
@@ -139,9 +148,15 @@ namespace InvigulusData
                                 "WHERE ExamID = @ExamID " +
                                     "AND Administrator = @Administrator " +
                                     "AND ExamName = @OldExamName " +
-                                    "AND Duration = @OldDuration " +
-                                    "AND ExamURL = @OldExamURL " +
-                                    "AND PermittedAttempts = @OldPermittedAttempts";
+                                    "AND ExamURL = @OldExamURL ";
+                if (oldExam.Duration.HasValue)
+                    query += "AND Duration = @OldDuration ";
+                else
+                    query += "AND Duration IS NULL ";
+                if (oldExam.PermittedAttempts.HasValue)
+                    query += "AND PermittedAttempts = @OldPermittedAttempts";
+                else
+                    query += "AND PermittedAttempts IS NULL ";
 
                 using (SqlCommand cmd = new SqlCommand(query, connection))
                 {
@@ -154,11 +169,12 @@ namespace InvigulusData
 
                     if (oldExam.Duration.HasValue) //Old duration is not null
                         cmd.Parameters.AddWithValue("@OldDuration", oldExam.Duration);
-                    else                           //New duration is null
-                        cmd.Parameters.AddWithValue("@OldDuration", DBNull.Value);
 
                     cmd.Parameters.AddWithValue("@OldExamURL", oldExam.ExamURL);
-                    cmd.Parameters.AddWithValue("@OldPermittedAttempts", oldExam.PermittedAttempts);
+
+                    if (oldExam.PermittedAttempts.HasValue) //Old Attempts is not null
+                        cmd.Parameters.AddWithValue("@OldPermittedAttempts", oldExam.PermittedAttempts);
+
 
                     //set new exam parameters
                     cmd.Parameters.AddWithValue("@NewExamURL", newExam.ExamURL);
@@ -168,7 +184,10 @@ namespace InvigulusData
                     else                           //New duration is null
                         cmd.Parameters.AddWithValue("@NewDuration", DBNull.Value);
 
-                    cmd.Parameters.AddWithValue("@NewPermittedAttempts", newExam.PermittedAttempts);
+                    if (newExam.PermittedAttempts.HasValue) //New PermittedAttempts is not null
+                        cmd.Parameters.AddWithValue("@NewPermittedAttempts", newExam.PermittedAttempts);
+                    else                           //New PermittedAttempts is null
+                        cmd.Parameters.AddWithValue("@NewPermittedAttempts", DBNull.Value);
 
                     //execute query
                     cmd.Connection.Open();
