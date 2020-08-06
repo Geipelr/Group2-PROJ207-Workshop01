@@ -7,6 +7,10 @@ using System.Windows.Forms;
 
 namespace Invigulus_ExamMaintenance
 {
+    /// <summary>
+    /// Validator class that validates data in TextBoxes
+    /// Author: Kevin Duong
+    /// </summary>
     public static class Validator
     {
         //Check if input from inputbox is provided

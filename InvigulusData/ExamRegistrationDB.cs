@@ -7,8 +7,14 @@ using System.Threading.Tasks;
 
 namespace InvigulusData
 {
+    /// <summary>
+    /// Exam Registration manager that handles passing data between the database and forms
+    /// Author: Robert Geipel
+    /// </summary>
+
     public class ExamRegistrationDB
     {
+        //Get all the registered users for a given exam
         public static List<ExamRegistration> GetRegistrations(int examId)
         {
             // contains all the Ids

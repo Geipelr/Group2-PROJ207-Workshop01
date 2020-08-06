@@ -7,8 +7,14 @@ using System.Threading.Tasks;
 
 namespace InvigulusData
 {
+    /// <summary>
+    /// Exam Admin manager for passing data between the database and the forms
+    /// Author: Robert Geipel
+    /// </summary>
+
     public static class ExamAdministratorDB
     {
+        //Get all the Exam Admins from the database as a list
         public static List<ExamAdministrator> GetAdministrators()
         {
             // contains all the Ids
@@ -50,6 +56,7 @@ namespace InvigulusData
 
         }
 
+        //Get all the institution names from the database
         public static List<ExamAdministrator> GetInstitutions() {
             // contains all the Ids
             List<ExamAdministrator> institutions = new List<ExamAdministrator>();

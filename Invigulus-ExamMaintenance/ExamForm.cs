@@ -54,6 +54,9 @@ namespace Invigulus_ExamMaintenance
 
             /* Opens ADD/UPDATE form */
             var result = addForm.ShowDialog();
+
+            //When adding is successful, refresh the exam list to the
+            //newly created exam and enable delete and update buttons
             if (result == DialogResult.OK)
             {
                 RefreshExams(addForm.Exam.ExamID);
@@ -65,10 +68,14 @@ namespace Invigulus_ExamMaintenance
         /* UPDATE existing Exam */
         private void ctrl_btn_updateExam_Click(object sender, EventArgs e)
         {
+            //Set the add/update form to update by seeing the bool parameter as false
+            //and pass in the exam to update
             AddUpdateExamForm updateForm = new AddUpdateExamForm(false, exam);
 
             /* Opens ADD/UPDATE form */
             var result = updateForm.ShowDialog();
+
+            //Refresh the exam selection to the updated exam with the newly set duration
             if (result == DialogResult.OK)
                 RefreshExams(updateForm.Exam.ExamID);
         }
@@ -138,7 +145,7 @@ namespace Invigulus_ExamMaintenance
         /* Choose the Admin, only triggers on user selection */
         private void ctrl_cb_examAdmin_SelectionChangeCommitted(object sender, EventArgs e)
         {
-            //Clear Exam combobox and set clear duration textbox
+            //Clear Exam combobox and clear duration textbox
             ctrl_cb_examName.DataSource = null;
             ctrl_cb_examName.Text = "";
             ctrl_tb_duration.Text = "";
@@ -282,7 +289,7 @@ namespace Invigulus_ExamMaintenance
             }
         }
 
-        /* METHOS -> Refresh exam combo box and change index to the matching examID */
+        /* METHOD -> Refresh exam combo box and change index to the matching examID */
         private void RefreshExams(int examID)
         {
             SetCbExams();

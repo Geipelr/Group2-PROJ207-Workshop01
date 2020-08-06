@@ -7,47 +7,13 @@ using System.Threading.Tasks;
 
 namespace InvigulusData
 {
+    ///<summary>
+    ///Exam manager that deals with passing data between the form and the database
+    ///Authors: Crystal Champion (Add and Delete methods)
+    ///         Kevin Duong (Update and Get Exam methods)
+    ///</summary>
     public static class ExamDB
     {
-        //Get an exam from the database using the examID
-        public static Exam GetExamByID(int examID)
-        {
-            Exam exam = null;
-
-            // create connection
-            using (SqlConnection connection = Invigulus.GetConnection())
-            {
-                // create SELECT command
-                string query = "SELECT * FROM Exam WHERE ExamID = @ExamID";
-                using (SqlCommand cmd = new SqlCommand(query, connection))
-                {
-                    cmd.Parameters.AddWithValue("@ExamID", examID);
-                    connection.Open();
-
-                    // execute the command and process results
-                    using (SqlDataReader dr = cmd.ExecuteReader())
-                    {
-                        while (dr.Read())
-                        {
-                            exam = new Exam {
-                                ExamID = Convert.ToInt32(dr["ExamID"]),
-                                Administrator = Convert.ToInt32(dr["Administrator"]),
-                                ExamName = dr["ExamName"].ToString(),
-                                Duration = Convert.ToInt32(dr["Duration"] ?? null),
-                                ExamURL = dr["ExamURL"].ToString(),
-                                PermittedAttempts = Convert.ToInt32(dr["PermittedAttempts"] ?? null)
-                            };
-
-                        }
-
-                    }// automatically data reader closes and gets  recycled
-                }
-
-            } // object automatically  closed and recycled
-
-            return exam;
-        }
-
         //Get a list of exams from an administrator using their ID
         public static List<Exam> GetExamByAdmin(int adminID)
         {
@@ -73,14 +39,18 @@ namespace InvigulusData
                             exam.ExamID = Convert.ToInt32(dr["ExamID"]);
                             exam.Administrator = Convert.ToInt32(dr["Administrator"]);
                             exam.ExamName = dr["ExamName"].ToString();
+                            exam.ExamURL = dr["ExamURL"].ToString();
+
+                            //When Duration is received as null, set value to null
                             if (dr["Duration"] == DBNull.Value)
                                 exam.Duration = null;
-                            else
+                            else //Duration is receieved as an int, set given value
                                 exam.Duration = Convert.ToInt32(dr["Duration"]);
-                            exam.ExamURL = dr["ExamURL"].ToString();
+
+                            //When Attempts is received as null, set value to null
                             if (dr["PermittedAttempts"] == DBNull.Value)
                                 exam.PermittedAttempts = null;
-                            else
+                            else //When Attempts is received as an int, set as given value
                                 exam.PermittedAttempts = Convert.ToInt32(dr["PermittedAttempts"]);
 
                             exams.Add(exam);
@@ -94,18 +64,24 @@ namespace InvigulusData
             return exams;
         }
 
+        //Add an exam to the databased using a passed in exam, return the created exam ID
         public static int AddExam(Exam exam)
         {
             int examID = 0;
+            //Create connection
             using (SqlConnection connection = Invigulus.GetConnection())
             {
+                //Create INSERT query
                 string insertStat = "INSERT INTO Exam(Administrator, ExamName, Duration, ExamUrl, PermittedAttempts) " +
                     "OUTPUT inserted.ExamID " +
                     "VALUES(@Administrator, @ExamName, @Duration, @ExamUrl, @PermittedAttempts)";
+                
+                //Execute command and process results
                 using (SqlCommand cmd = new SqlCommand(insertStat, connection))
                 {
                     cmd.Parameters.AddWithValue("@Administrator", exam.Administrator);
                     cmd.Parameters.AddWithValue("@ExamName", exam.ExamName);
+                    cmd.Parameters.AddWithValue("@ExamUrl", exam.ExamURL);
 
                     //Check if duration has a value
                     if (exam.Duration.HasValue)
@@ -113,12 +89,9 @@ namespace InvigulusData
                     else
                         cmd.Parameters.AddWithValue("@Duration", DBNull.Value);
 
-
-                    cmd.Parameters.AddWithValue("@ExamUrl", exam.ExamURL);
-
-                    //Check if duration has a value
+                    //Check if Attempts has a value
                     if (exam.PermittedAttempts.HasValue)
-                        cmd.Parameters.AddWithValue("@PermittedAttempts", exam.Duration);
+                        cmd.Parameters.AddWithValue("@PermittedAttempts", exam.PermittedAttempts);
                     else
                         cmd.Parameters.AddWithValue("@PermittedAttempts", DBNull.Value);
                     connection.Open();
@@ -149,13 +122,17 @@ namespace InvigulusData
                                     "AND Administrator = @Administrator " +
                                     "AND ExamName = @OldExamName " +
                                     "AND ExamURL = @OldExamURL ";
-                if (oldExam.Duration.HasValue)
+
+                //Check if duration has a value and change WHERE query based on that
+                if (oldExam.Duration.HasValue) //Check for identical int value
                     query += "AND Duration = @OldDuration ";
-                else
+                else                            //Check if it's null
                     query += "AND Duration IS NULL ";
-                if (oldExam.PermittedAttempts.HasValue)
+
+                //Check if duration has a value and change WHERE query based on that
+                if (oldExam.PermittedAttempts.HasValue) //Check for identical int value
                     query += "AND PermittedAttempts = @OldPermittedAttempts";
-                else
+                else                                    //Check if it's null
                     query += "AND PermittedAttempts IS NULL ";
 
                 using (SqlCommand cmd = new SqlCommand(query, connection))
@@ -163,14 +140,13 @@ namespace InvigulusData
                     //Set ID parameters
                     cmd.Parameters.AddWithValue("@ExamID", oldExam.ExamID);
                     cmd.Parameters.AddWithValue("@Administrator", oldExam.Administrator);
+                    cmd.Parameters.AddWithValue("@OldExamURL", oldExam.ExamURL);
 
                     //Set old exam parameters
                     cmd.Parameters.AddWithValue("@OldExamName", oldExam.ExamName);
 
                     if (oldExam.Duration.HasValue) //Old duration is not null
                         cmd.Parameters.AddWithValue("@OldDuration", oldExam.Duration);
-
-                    cmd.Parameters.AddWithValue("@OldExamURL", oldExam.ExamURL);
 
                     if (oldExam.PermittedAttempts.HasValue) //Old Attempts is not null
                         cmd.Parameters.AddWithValue("@OldPermittedAttempts", oldExam.PermittedAttempts);
@@ -199,14 +175,13 @@ namespace InvigulusData
             return success;
         }
 
+        //Delete an exam record by ID in Exam table
         public static void DeleteExam(int id)
         {
-
             // create connection
             using (SqlConnection connection = Invigulus.GetConnection())
             {
-
-                // create SELECT command
+                // create DELETE command
                 string query = "DELETE FROM Exam WHERE ExamID = @ExamID";
                 using (SqlCommand cmd = new SqlCommand(query, connection))
                 {
