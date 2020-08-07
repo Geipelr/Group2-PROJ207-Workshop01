@@ -9,6 +9,11 @@ namespace InvigulusData
 {
     public static class ExamDB
     {
+        /*  Authors: Kevin Duong/Robert Geipel 
+         *  Date: 8/7/2020
+         *  Purpose: Data access for exam related data
+         */
+
         //Get an exam from the database using the examID
         public static Exam GetExamByID(int examID)
         {

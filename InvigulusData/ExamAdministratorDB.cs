@@ -7,6 +7,11 @@ using System.Threading.Tasks;
 
 namespace InvigulusData
 {
+    /*  Author: Robert Geipel 
+     *  Date: 8/7/2020
+     *  Purpose: Data access for exam administrator
+     */
+
     public static class ExamAdministratorDB
     {
         public static List<ExamAdministrator> GetAdministrators()

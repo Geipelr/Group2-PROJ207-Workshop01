@@ -9,6 +9,11 @@ namespace InvigulusData
 {
     public static class Invigulus
     {
+        /*  Author: Robert Geipel 
+         *  Date: 8/7/2020
+         *  Purpose: Data base connection
+         */
+
         // establishes the connection
         public static SqlConnection GetConnection()
         {

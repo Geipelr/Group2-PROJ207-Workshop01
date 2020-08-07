@@ -6,6 +6,11 @@ using System.Threading.Tasks;
 
 namespace InvigulusData
 {
+    /*  Author: Robert Geipel 
+    *  Date: 8/7/2020
+    *  Purpose: Data access for exam registrations
+    */
+
     public class ExamRegistration
     {
         public int RegistrationID
