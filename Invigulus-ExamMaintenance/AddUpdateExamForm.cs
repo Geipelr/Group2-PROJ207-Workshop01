@@ -13,6 +13,9 @@ namespace Invigulus_ExamMaintenance
 {   /// <summary>
     /// Add/Update Exams sub-form.  
     /// Includes controls to add exams and to update exams.
+    /// Authors:    Crystal (UI Design and button functionality)
+    ///             Kevin Duong (Dynamic labels and validation)
+    ///             Richard Galambos (Stylings)
     /// </summary>
     public partial class AddUpdateExamForm : Form
     {
@@ -44,7 +47,6 @@ namespace Invigulus_ExamMaintenance
                 ctrl_tb_examname.Enabled = false;           // User cannot change the exam name
 
                 ////Display old exam data in form
-                //ind_tb_adminID.Text = exam.Administrator.ToString();
                 ctrl_tb_examname.Text = Exam.ExamName;
                 ctrl_tb_duration.Text = Exam.Duration.ToString();
                 ctrl_tb_permattempt.Text = Exam.PermittedAttempts.ToString();
@@ -62,6 +64,7 @@ namespace Invigulus_ExamMaintenance
                     Exam newExam = new Exam();
                     newExam.Administrator = Exam.Administrator;
                     this.PutExamData(newExam);
+
                     try
                     {
                         Exam.ExamID = ExamDB.AddExam(newExam); //AddExam from ExamDb
@@ -81,13 +84,14 @@ namespace Invigulus_ExamMaintenance
                     this.PutExamData(newExam);
                     try
                     {
+                        //Return error if update failed
                         if (!ExamDB.UpdateExam(Exam, newExam))
                         {
                             MessageBox.Show("Another user has updated or " +
                                 "deleted that exam.", "Database Error");
                             this.DialogResult = DialogResult.Retry;
                     }
-                        else
+                        else //Set the new exam as the form's exam and show success message
                         {
                             Exam = newExam;
                             this.DialogResult = DialogResult.OK;
@@ -114,26 +118,33 @@ namespace Invigulus_ExamMaintenance
 
             //Get inputs from the form
             exam.ExamName = ctrl_tb_examname.Text;
-            if (ctrl_tb_duration.Text == "")
+            exam.ExamURL = ctrl_tb_url.Text;
+
+            if (ctrl_tb_duration.Text == "") //Consider empty string as null duration 
                 exam.Duration = null;
             else
                 exam.Duration = Convert.ToInt32(ctrl_tb_duration.Text);
-            exam.ExamURL = ctrl_tb_url.Text;
-            exam.PermittedAttempts = Convert.ToInt32(ctrl_tb_permattempt.Text);
+
+            if (ctrl_tb_permattempt.Text == "") //Consider empty string as null attempts
+                exam.PermittedAttempts = null;
+            else
+                exam.PermittedAttempts = Convert.ToInt32(ctrl_tb_permattempt.Text);
         }
 
+        //Cancel button click event
         private void ctrl_btn_cancel_Click(object sender, EventArgs e)
         {
             this.Close();
         }
 
+        //Check if the data entered in the fields is valid
         private bool IsValidData()
         {
             return
                 (
                     Validator.IsPresent(ctrl_tb_examname, "Exam Name") &&
                     Validator.IsNullOrNonNegInt(ctrl_tb_duration, "Duration") &&
-                    Validator.IsNonNegativeInt(ctrl_tb_permattempt, "Permitted Attempts") &&
+                    Validator.IsNullOrNonNegInt(ctrl_tb_permattempt, "Permitted Attempts") &&
                     Validator.IsPresent(ctrl_tb_url, "Exam URL")
                 );
         }

@@ -7,6 +7,10 @@ using System.Threading.Tasks;
 
 namespace InvigulusData
 {
+    /// <summary>
+    /// Class that establishes the connection to the Invigulus database
+    /// Author: Robert Geipel
+    /// </summary>
     public static class Invigulus
     {
         /*  Author: Robert Geipel 
